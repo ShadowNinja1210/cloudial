@@ -14,6 +14,12 @@ pnpm dev
 bun dev
 ```
 
+```env
+DATABASE_URL:<YOUR DATABASE URL STRING>
+NEXTAUTH_SECRET:<YOUR NEXAUTH SECRET>
+CRON_SECRET:<YOUR_CRON_SECRET>
+```
+
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
