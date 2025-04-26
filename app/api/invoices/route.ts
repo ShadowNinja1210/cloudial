@@ -1,32 +1,33 @@
-import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth"
-import prisma from "@/lib/prisma"
+import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+import prisma from "@/lib/prisma";
 
 export async function GET(req: Request) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession(authOptions);
 
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { searchParams } = new URL(req.url)
-    const customerId = searchParams.get("customerId")
-    const status = searchParams.get("status")
-    const page = Number.parseInt(searchParams.get("page") || "1")
-    const limit = Number.parseInt(searchParams.get("limit") || "10")
+    const { searchParams } = new URL(req.url);
+    const customerId = searchParams.get("customerId");
+    const status = searchParams.get("status");
+    const page = Number.parseInt(searchParams.get("page") || "1");
+    const limit = Number.parseInt(searchParams.get("limit") || "10");
 
-    const skip = (page - 1) * limit
+    const skip = (page - 1) * limit;
 
-    const where: any = {}
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const where: any = {};
 
     if (customerId) {
-      where.customerId = customerId
+      where.customerId = customerId;
     }
 
     if (status) {
-      where.status = status
+      where.status = status;
     }
 
     const [invoices, totalInvoices] = await Promise.all([
@@ -46,9 +47,9 @@ export async function GET(req: Request) {
         },
       }),
       prisma.invoice.count({ where }),
-    ])
+    ]);
 
-    const totalPages = Math.ceil(totalInvoices / limit)
+    const totalPages = Math.ceil(totalInvoices / limit);
 
     return NextResponse.json({
       invoices,
@@ -58,34 +59,34 @@ export async function GET(req: Request) {
         totalInvoices,
         totalPages,
       },
-    })
+    });
   } catch (error) {
-    console.error("Error fetching invoices:", error)
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 })
+    console.error("Error fetching invoices:", error);
+    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
   }
 }
 
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession(authOptions);
 
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { customerId, externalId, amount, status, dueDate, description } = await req.json()
+    const { customerId, externalId, amount, status, dueDate, description } = await req.json();
 
     if (!customerId || !amount || !dueDate) {
-      return NextResponse.json({ error: "Customer ID, amount, and due date are required" }, { status: 400 })
+      return NextResponse.json({ error: "Customer ID, amount, and due date are required" }, { status: 400 });
     }
 
     // Check if customer exists
     const customer = await prisma.customer.findUnique({
       where: { id: customerId },
-    })
+    });
 
     if (!customer) {
-      return NextResponse.json({ error: "Customer not found" }, { status: 404 })
+      return NextResponse.json({ error: "Customer not found" }, { status: 404 });
     }
 
     // Check if invoice with externalId already exists for this customer
@@ -95,13 +96,13 @@ export async function POST(req: Request) {
           customerId,
           externalId,
         },
-      })
+      });
 
       if (existingInvoice) {
         return NextResponse.json(
           { error: "Invoice with this external ID already exists for this customer" },
-          { status: 400 },
-        )
+          { status: 400 }
+        );
       }
     }
 
@@ -114,7 +115,7 @@ export async function POST(req: Request) {
         dueDate: new Date(dueDate),
         description,
       },
-    })
+    });
 
     // Create audit log entry for invoice creation
     await prisma.invoiceAuditLog.create({
@@ -124,11 +125,11 @@ export async function POST(req: Request) {
         previousValue: "",
         newValue: "Invoice created",
       },
-    })
+    });
 
-    return NextResponse.json(invoice, { status: 201 })
+    return NextResponse.json(invoice, { status: 201 });
   } catch (error) {
-    console.error("Error creating invoice:", error)
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 })
+    console.error("Error creating invoice:", error);
+    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
   }
 }

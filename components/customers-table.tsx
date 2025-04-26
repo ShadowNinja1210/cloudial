@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Pagination,
   PaginationContent,
@@ -13,82 +13,82 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { formatCurrency } from "@/lib/utils"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Eye, Search } from "lucide-react"
+} from "@/components/ui/pagination";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatCurrency } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Eye, Search } from "lucide-react";
 
 interface Customer {
-  id: string
-  name: string
-  email: string
-  totalAmount: number
-  outstandingAmount: number
-  invoiceCount: number
+  id: string;
+  name: string;
+  email: string;
+  totalAmount: number;
+  outstandingAmount: number;
+  invoiceCount: number;
 }
 
 interface PaginationData {
-  page: number
-  limit: number
-  totalCustomers: number
-  totalPages: number
+  page: number;
+  limit: number;
+  totalCustomers: number;
+  totalPages: number;
 }
 
 export function CustomersTable() {
-  const router = useRouter()
-  const [customers, setCustomers] = useState<Customer[]>([])
+  const router = useRouter();
+  const [customers, setCustomers] = useState<Customer[]>([]);
   const [pagination, setPagination] = useState<PaginationData>({
     page: 1,
     limit: 10,
     totalCustomers: 0,
     totalPages: 0,
-  })
-  const [isLoading, setIsLoading] = useState(true)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [debouncedQuery, setDebouncedQuery] = useState("")
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
 
   // Debounce search query
   useEffect(() => {
     const timer = setTimeout(() => {
-      setDebouncedQuery(searchQuery)
-    }, 500)
+      setDebouncedQuery(searchQuery);
+    }, 500);
 
-    return () => clearTimeout(timer)
-  }, [searchQuery])
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   // Fetch customers
   useEffect(() => {
     const fetchCustomers = async () => {
-      setIsLoading(true)
+      setIsLoading(true);
       try {
         const queryParams = new URLSearchParams({
           page: pagination.page.toString(),
           limit: pagination.limit.toString(),
-        })
+        });
 
         if (debouncedQuery) {
-          queryParams.append("search", debouncedQuery)
+          queryParams.append("search", debouncedQuery);
         }
 
-        const response = await fetch(`/api/customers?${queryParams}`)
-        const data = await response.json()
+        const response = await fetch(`/api/customers?${queryParams}`);
+        const data = await response.json();
 
-        setCustomers(data.customers)
-        setPagination(data.pagination)
+        setCustomers(data.customers);
+        setPagination(data.pagination);
       } catch (error) {
-        console.error("Error fetching customers:", error)
+        console.error("Error fetching customers:", error);
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    fetchCustomers()
-  }, [pagination.page, pagination.limit, debouncedQuery])
+    fetchCustomers();
+  }, [pagination.page, pagination.limit, debouncedQuery]);
 
   const handlePageChange = (newPage: number) => {
-    setPagination((prev) => ({ ...prev, page: newPage }))
-  }
+    setPagination((prev) => ({ ...prev, page: newPage }));
+  };
 
   return (
     <Card className="col-span-4">
@@ -188,12 +188,12 @@ export function CustomersTable() {
               <PaginationItem>
                 <PaginationPrevious
                   onClick={() => handlePageChange(Math.max(1, pagination.page - 1))}
-                  disabled={pagination.page === 1 || isLoading}
+                  className={pagination.page === 1 || isLoading ? "disabled-class" : ""}
                 />
               </PaginationItem>
 
               {Array.from({ length: pagination.totalPages }).map((_, index) => {
-                const pageNumber = index + 1
+                const pageNumber = index + 1;
                 // Show current page, first, last, and pages around current
                 if (
                   pageNumber === 1 ||
@@ -205,12 +205,12 @@ export function CustomersTable() {
                       <PaginationLink
                         isActive={pageNumber === pagination.page}
                         onClick={() => handlePageChange(pageNumber)}
-                        disabled={isLoading}
+                        className={isLoading ? "disabled-class" : ""}
                       >
                         {pageNumber}
                       </PaginationLink>
                     </PaginationItem>
-                  )
+                  );
                 }
 
                 // Show ellipsis for page gaps
@@ -220,18 +220,18 @@ export function CustomersTable() {
                 ) {
                   return (
                     <PaginationItem key={`ellipsis-${pageNumber}`}>
-                      <PaginationLink disabled>...</PaginationLink>
+                      <span className="pagination-ellipsis">...</span>
                     </PaginationItem>
-                  )
+                  );
                 }
 
-                return null
+                return null;
               })}
 
               <PaginationItem>
                 <PaginationNext
                   onClick={() => handlePageChange(Math.min(pagination.totalPages, pagination.page + 1))}
-                  disabled={pagination.page === pagination.totalPages || isLoading}
+                  className={pagination.page === pagination.totalPages || isLoading ? "disabled-class" : ""}
                 />
               </PaginationItem>
             </PaginationContent>
@@ -239,5 +239,5 @@ export function CustomersTable() {
         </CardFooter>
       )}
     </Card>
-  )
+  );
 }

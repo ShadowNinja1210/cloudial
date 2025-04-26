@@ -1,30 +1,24 @@
-import type { Metadata } from "next"
-import { notFound } from "next/navigation"
-import { CustomerForm } from "@/components/customer/customer-form"
-import prisma from "@/lib/prisma"
-
-interface EditCustomerPageProps {
-  params: {
-    id: string
-  }
-}
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { CustomerForm } from "@/components/customer-form";
+import prisma from "@/lib/prisma";
 
 export const metadata: Metadata = {
   title: "Edit Customer",
   description: "Edit customer details",
-}
+};
 
-export default async function EditCustomerPage({ params }: EditCustomerPageProps) {
+export default async function EditCustomerPage({ params }: { params: { id: string } }) {
   if (!params.id) {
-    notFound()
+    notFound();
   }
 
   const customer = await prisma.customer.findUnique({
     where: { id: params.id },
-  })
+  });
 
   if (!customer) {
-    notFound()
+    notFound();
   }
 
   return (
@@ -36,5 +30,5 @@ export default async function EditCustomerPage({ params }: EditCustomerPageProps
 
       <CustomerForm customer={customer} isEditing={true} />
     </div>
-  )
+  );
 }

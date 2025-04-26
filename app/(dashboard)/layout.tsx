@@ -1,19 +1,15 @@
-import type React from "react"
-import { redirect } from "next/navigation"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth"
-import { MainNav } from "@/components/layout/main-nav"
-import { UserNav } from "@/components/layout/user-nav"
+import type React from "react";
+import { redirect } from "next/navigation";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+import { MainNav } from "@/components/main-nav";
+import { UserNav } from "@/components/user-nav";
 
-export default async function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  const session = await getServerSession(authOptions)
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const session = await getServerSession(authOptions);
 
   if (!session) {
-    redirect("/login")
+    redirect("/login");
   }
 
   return (
@@ -29,5 +25,5 @@ export default async function DashboardLayout({
       </header>
       <main className="flex-1 container py-6">{children}</main>
     </div>
-  )
+  );
 }

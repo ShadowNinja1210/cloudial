@@ -1,12 +1,12 @@
-import type { Metadata } from "next"
-import { StatsCards } from "@/components/dashboard/stats-cards"
-import { RevenueChart } from "@/components/dashboard/revenue-chart"
-import { CustomersTable } from "@/components/dashboard/customers-table"
+import type { Metadata } from "next";
+import { StatsCards } from "@/components/stats-cards";
+import { RevenueChart } from "@/components/revenue-chart";
+import { CustomersTable } from "@/components/customers-table";
 
 export const metadata: Metadata = {
   title: "Dashboard",
   description: "Overview of your business",
-}
+};
 
 export default function DashboardPage() {
   return (
@@ -24,5 +24,5 @@ export default function DashboardPage() {
 
       <CustomersTable />
     </div>
-  )
+  );
 }

@@ -1,12 +1,12 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
-import { formatCurrency } from "@/lib/utils"
-import { Edit, Trash, Mail, Phone, MapPin } from "lucide-react"
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { formatCurrency } from "@/lib/utils";
+import { Edit, Trash, Mail, Phone, MapPin } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,84 +17,85 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
 
 interface Customer {
-  id: string
-  name: string
-  email: string
-  phone: string | null
-  address: string | null
-  externalId: string | null
-  invoices: any[]
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  address: string | null;
+  externalId: string | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  invoices: any[];
 }
 
 interface CustomerDetailsProps {
-  customerId: string
+  customerId: string;
 }
 
 export function CustomerDetails({ customerId }: CustomerDetailsProps) {
-  const router = useRouter()
-  const [customer, setCustomer] = useState<Customer | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [isDeleting, setIsDeleting] = useState(false)
+  const router = useRouter();
+  const [customer, setCustomer] = useState<Customer | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const fetchCustomer = async () => {
       try {
-        const response = await fetch(`/api/customers/${customerId}`)
+        const response = await fetch(`/api/customers/${customerId}`);
         if (!response.ok) {
-          throw new Error("Failed to fetch customer")
+          throw new Error("Failed to fetch customer");
         }
-        const data = await response.json()
-        setCustomer(data)
+        const data = await response.json();
+        setCustomer(data);
       } catch (error) {
-        console.error("Error fetching customer:", error)
+        console.error("Error fetching customer:", error);
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
     if (customerId) {
-      fetchCustomer()
+      fetchCustomer();
     }
-  }, [customerId])
+  }, [customerId]);
 
   const handleDelete = async () => {
-    if (!customer) return
+    if (!customer) return;
 
-    setIsDeleting(true)
+    setIsDeleting(true);
     try {
       const response = await fetch(`/api/customers/${customer.id}`, {
         method: "DELETE",
-      })
+      });
 
       if (!response.ok) {
-        throw new Error("Failed to delete customer")
+        throw new Error("Failed to delete customer");
       }
 
-      router.push("/dashboard")
+      router.push("/dashboard");
     } catch (error) {
-      console.error("Error deleting customer:", error)
+      console.error("Error deleting customer:", error);
     } finally {
-      setIsDeleting(false)
+      setIsDeleting(false);
     }
-  }
+  };
 
   // Calculate totals
-  const totalAmount = customer?.invoices.reduce((sum, invoice) => sum + invoice.amount, 0) || 0
+  const totalAmount = customer?.invoices.reduce((sum, invoice) => sum + invoice.amount, 0) || 0;
   const paidAmount =
     customer?.invoices
       .filter((invoice) => invoice.status === "PAID")
-      .reduce((sum, invoice) => sum + invoice.amount, 0) || 0
+      .reduce((sum, invoice) => sum + invoice.amount, 0) || 0;
   const pendingAmount =
     customer?.invoices
       .filter((invoice) => invoice.status === "PENDING")
-      .reduce((sum, invoice) => sum + invoice.amount, 0) || 0
+      .reduce((sum, invoice) => sum + invoice.amount, 0) || 0;
   const overdueAmount =
     customer?.invoices
       .filter((invoice) => invoice.status === "PAST_DUE")
-      .reduce((sum, invoice) => sum + invoice.amount, 0) || 0
+      .reduce((sum, invoice) => sum + invoice.amount, 0) || 0;
 
   return (
     <Card>
@@ -212,5 +213,5 @@ export function CustomerDetails({ customerId }: CustomerDetailsProps) {
         )}
       </CardContent>
     </Card>
-  )
+  );
 }

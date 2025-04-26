@@ -1,23 +1,23 @@
-import type { Metadata } from "next"
-import { notFound } from "next/navigation"
-import { InvoiceForm } from "@/components/customer/invoice-form"
-import prisma from "@/lib/prisma"
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { InvoiceForm } from "@/components/invoice-form";
+import prisma from "@/lib/prisma";
 
 interface EditInvoicePageProps {
   params: {
-    id: string
-    invoiceId: string
-  }
+    id: string;
+    invoiceId: string;
+  };
 }
 
 export const metadata: Metadata = {
   title: "Edit Invoice",
   description: "Edit invoice details",
-}
+};
 
 export default async function EditInvoicePage({ params }: EditInvoicePageProps) {
   if (!params.id || !params.invoiceId) {
-    notFound()
+    notFound();
   }
 
   // Verify invoice exists and belongs to the customer
@@ -26,10 +26,10 @@ export default async function EditInvoicePage({ params }: EditInvoicePageProps) 
       id: params.invoiceId,
       customerId: params.id,
     },
-  })
+  });
 
   if (!invoice) {
-    notFound()
+    notFound();
   }
 
   return (
@@ -41,5 +41,5 @@ export default async function EditInvoicePage({ params }: EditInvoicePageProps) 
 
       <InvoiceForm customerId={params.id} invoice={invoice} isEditing={true} />
     </div>
-  )
+  );
 }

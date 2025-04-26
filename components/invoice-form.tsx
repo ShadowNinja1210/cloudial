@@ -1,18 +1,18 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 
-import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const formSchema = z.object({
   customerId: z.string(),
@@ -23,18 +23,19 @@ const formSchema = z.object({
     message: "Please enter a valid date",
   }),
   description: z.string().optional(),
-})
+});
 
 interface InvoiceFormProps {
-  customerId: string
-  invoice?: any
-  isEditing?: boolean
+  customerId: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  invoice?: any;
+  isEditing?: boolean;
 }
 
 export function InvoiceForm({ customerId, invoice, isEditing = false }: InvoiceFormProps) {
-  const router = useRouter()
-  const [error, setError] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -48,16 +49,16 @@ export function InvoiceForm({ customerId, invoice, isEditing = false }: InvoiceF
         : new Date().toISOString().split("T")[0],
       description: invoice?.description || "",
     },
-  })
+  });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true)
-    setError(null)
+    setIsLoading(true);
+    setError(null);
 
     try {
-      const url = isEditing ? `/api/invoices/${invoice.id}` : "/api/invoices"
+      const url = isEditing ? `/api/invoices/${invoice.id}` : "/api/invoices";
 
-      const method = isEditing ? "PUT" : "POST"
+      const method = isEditing ? "PUT" : "POST";
 
       const response = await fetch(url, {
         method,
@@ -65,21 +66,22 @@ export function InvoiceForm({ customerId, invoice, isEditing = false }: InvoiceF
           "Content-Type": "application/json",
         },
         body: JSON.stringify(values),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || "Something went wrong")
-        return
+        setError(data.error || "Something went wrong");
+        return;
       }
 
-      router.push(`/customer/${customerId}`)
-      router.refresh()
+      router.push(`/customer/${customerId}`);
+      router.refresh();
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      setError("An unexpected error occurred. Please try again.")
+      setError("An unexpected error occurred. Please try again.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
@@ -200,5 +202,5 @@ export function InvoiceForm({ customerId, invoice, isEditing = false }: InvoiceF
         </Form>
       </CardContent>
     </Card>
-  )
+  );
 }

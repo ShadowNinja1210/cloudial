@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Skeleton } from "@/components/ui/skeleton"
-import { formatCurrency, formatDate, getStatusColor } from "@/lib/utils"
-import { Edit, Trash, FileText } from "lucide-react"
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { formatCurrency, formatDate, getStatusColor } from "@/lib/utils";
+import { Edit, Trash, FileText } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,60 +18,61 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
 
 interface InvoiceDetailsProps {
-  customerId: string
-  invoiceId: string
+  customerId: string;
+  invoiceId: string;
 }
 
 export function InvoiceDetails({ customerId, invoiceId }: InvoiceDetailsProps) {
-  const router = useRouter()
-  const [invoice, setInvoice] = useState<any | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [isDeleting, setIsDeleting] = useState(false)
+  const router = useRouter();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [invoice, setInvoice] = useState<any | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const fetchInvoice = async () => {
       try {
-        const response = await fetch(`/api/invoices/${invoiceId}`)
+        const response = await fetch(`/api/invoices/${invoiceId}`);
         if (!response.ok) {
-          throw new Error("Failed to fetch invoice")
+          throw new Error("Failed to fetch invoice");
         }
-        const data = await response.json()
-        setInvoice(data)
+        const data = await response.json();
+        setInvoice(data);
       } catch (error) {
-        console.error("Error fetching invoice:", error)
+        console.error("Error fetching invoice:", error);
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
     if (invoiceId) {
-      fetchInvoice()
+      fetchInvoice();
     }
-  }, [invoiceId])
+  }, [invoiceId]);
 
   const handleDelete = async () => {
-    if (!invoice) return
+    if (!invoice) return;
 
-    setIsDeleting(true)
+    setIsDeleting(true);
     try {
       const response = await fetch(`/api/invoices/${invoice.id}`, {
         method: "DELETE",
-      })
+      });
 
       if (!response.ok) {
-        throw new Error("Failed to delete invoice")
+        throw new Error("Failed to delete invoice");
       }
 
-      router.push(`/customer/${customerId}`)
+      router.push(`/customer/${customerId}`);
     } catch (error) {
-      console.error("Error deleting invoice:", error)
+      console.error("Error deleting invoice:", error);
     } finally {
-      setIsDeleting(false)
+      setIsDeleting(false);
     }
-  }
+  };
 
   return (
     <Card>
@@ -177,6 +178,7 @@ export function InvoiceDetails({ customerId, invoiceId }: InvoiceDetailsProps) {
               <h3 className="text-sm font-medium text-muted-foreground mb-3">Audit Log</h3>
               {invoice?.auditLogs && invoice.auditLogs.length > 0 ? (
                 <div className="space-y-3">
+                  {/*  eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                   {invoice.auditLogs.map((log: any) => (
                     <div key={log.id} className="flex items-start gap-2 text-sm border-l-2 border-muted pl-3 py-1">
                       <FileText className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
@@ -204,5 +206,5 @@ export function InvoiceDetails({ customerId, invoiceId }: InvoiceDetailsProps) {
         )}
       </CardContent>
     </Card>
-  )
+  );
 }

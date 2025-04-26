@@ -1,10 +1,10 @@
-import type { Metadata } from "next"
-import { CustomerForm } from "@/components/customer/customer-form"
+import type { Metadata } from "next";
+import { CustomerForm } from "@/components/customer-form";
 
 export const metadata: Metadata = {
   title: "Add Customer",
   description: "Add a new customer",
-}
+};
 
 export default function NewCustomerPage() {
   return (
@@ -16,5 +16,5 @@ export default function NewCustomerPage() {
 
       <CustomerForm />
     </div>
-  )
+  );
 }
