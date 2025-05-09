@@ -3,6 +3,39 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
+interface CustomerFromDB {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  address: string | null;
+  externalId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  _count: {
+    invoices: number;
+  };
+  invoices: {
+    amount: number;
+    status: string;
+  }[];
+}
+
+// Add interface for the processed customer data
+interface CustomerWithTotals {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  address: string | null;
+  externalId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  totalAmount: number;
+  outstandingAmount: number;
+  invoiceCount: number;
+}
+
 export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -51,19 +84,26 @@ export async function GET(req: Request) {
     const totalPages = Math.ceil(totalCustomers / limit);
 
     // Calculate total and outstanding amounts for each customer
-    const customersWithTotals = customers.map((customer) => {
+    const customersWithTotals: CustomerWithTotals[] = customers.map((customer: CustomerFromDB) => {
       const totalAmount = customer.invoices.reduce((sum, invoice) => sum + invoice.amount, 0);
       const outstandingAmount = customer.invoices
         .filter((invoice) => invoice.status === "PENDING" || invoice.status === "PAST_DUE")
         .reduce((sum, invoice) => sum + invoice.amount, 0);
 
+      const { id, name, email, phone, address, externalId, createdAt, updatedAt } = customer;
+
       return {
-        ...customer,
+        id,
+        name,
+        email,
+        phone,
+        address,
+        externalId,
+        createdAt,
+        updatedAt,
         totalAmount,
         outstandingAmount,
         invoiceCount: customer._count.invoices,
-        invoices: undefined,
-        _count: undefined,
       };
     });
 
