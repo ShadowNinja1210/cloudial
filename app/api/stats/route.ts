@@ -31,7 +31,8 @@ export async function GET() {
     let pendingRevenue = 0;
     let overdueRevenue = 0;
 
-    invoiceStats.forEach((stat) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    invoiceStats.forEach((stat: any) => {
       totalInvoices += stat._count.id;
 
       if (stat._sum.amount) {
