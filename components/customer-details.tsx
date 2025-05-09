@@ -19,6 +19,24 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
+enum InvoiceStatus {
+  PAID = "PAID",
+  PENDING = "PENDING",
+  PAST_DUE = "PAST_DUE",
+}
+
+interface Invoice {
+  id: string;
+  customerId: string;
+  externalId?: string | null;
+  amount: number;
+  status: InvoiceStatus;
+  dueDate: Date | string;
+  description?: string | null;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+}
+
 interface Customer {
   id: string;
   name: string;
@@ -26,8 +44,7 @@ interface Customer {
   phone: string | null;
   address: string | null;
   externalId: string | null;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  invoices: any[];
+  invoices: Invoice[];
 }
 
 interface CustomerDetailsProps {
