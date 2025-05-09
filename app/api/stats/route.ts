@@ -74,7 +74,8 @@ export async function GET() {
       totalRevenue,
       pendingRevenue,
       overdueRevenue,
-      invoicesByStatus: invoiceStats.reduce((acc: Record<string, number>, stat) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      invoicesByStatus: invoiceStats.reduce((acc: Record<string, number>, stat: any) => {
         acc[stat.status] = stat._count.id;
         return acc;
       }, {}),
