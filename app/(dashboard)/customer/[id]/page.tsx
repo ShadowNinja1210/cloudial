@@ -4,9 +4,7 @@ import { CustomerDetails } from "@/components/customer-details";
 import { InvoiceTable } from "@/components/invoice-table";
 
 interface CustomerPageProps {
-  params: {
-    id: string;
-  };
+  params: Promise<{ id: string }>;
 }
 
 export const metadata: Metadata = {
@@ -14,15 +12,17 @@ export const metadata: Metadata = {
   description: "View and manage customer details",
 };
 
-export default function CustomerPage({ params }: CustomerPageProps) {
-  if (!params.id) {
+export default async function CustomerPage(props: CustomerPageProps) {
+  const { id } = await props.params;
+
+  if (!id) {
     notFound();
   }
 
   return (
     <div className="flex flex-col gap-6">
-      <CustomerDetails customerId={params.id} />
-      <InvoiceTable customerId={params.id} />
+      <CustomerDetails customerId={id} />
+      <InvoiceTable customerId={id} />
     </div>
   );
 }

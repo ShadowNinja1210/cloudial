@@ -4,9 +4,7 @@ import { InvoiceForm } from "@/components/invoice-form";
 import prisma from "@/lib/prisma";
 
 interface NewInvoicePageProps {
-  params: {
-    id: string;
-  };
+  params: Promise<{ id: string }>;
 }
 
 export const metadata: Metadata = {
@@ -15,13 +13,15 @@ export const metadata: Metadata = {
 };
 
 export default async function NewInvoicePage({ params }: NewInvoicePageProps) {
-  if (!params.id) {
+  const { id } = await params;
+
+  if (!id) {
     notFound();
   }
 
   // Verify customer exists
   const customer = await prisma.customer.findUnique({
-    where: { id: params.id },
+    where: { id: id },
   });
 
   if (!customer) {
@@ -35,7 +35,7 @@ export default async function NewInvoicePage({ params }: NewInvoicePageProps) {
         <p className="text-muted-foreground">Create a new invoice for {customer.name}</p>
       </div>
 
-      <InvoiceForm customerId={params.id} />
+      <InvoiceForm customerId={id} />
     </div>
   );
 }

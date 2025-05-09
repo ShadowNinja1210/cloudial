@@ -1,17 +1,19 @@
-import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth"
-import prisma from "@/lib/prisma"
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+import prisma from "@/lib/prisma";
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession(authOptions);
 
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const invoiceId = params.id
+    const { id } = await params;
+
+    const invoiceId = id;
 
     const invoice = await prisma.invoice.findUnique({
       where: { id: invoiceId },
@@ -27,37 +29,39 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
           orderBy: { timestamp: "desc" },
         },
       },
-    })
+    });
 
     if (!invoice) {
-      return NextResponse.json({ error: "Invoice not found" }, { status: 404 })
+      return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
     }
 
-    return NextResponse.json(invoice)
+    return NextResponse.json(invoice);
   } catch (error) {
-    console.error("Error fetching invoice:", error)
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 })
+    console.error("Error fetching invoice:", error);
+    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
   }
 }
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession(authOptions);
 
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const invoiceId = params.id
-    const { externalId, amount, status, dueDate, description } = await req.json()
+    const { id } = await params;
+
+    const invoiceId = id;
+    const { externalId, amount, status, dueDate, description } = await req.json();
 
     // Check if invoice exists
     const existingInvoice = await prisma.invoice.findUnique({
       where: { id: invoiceId },
-    })
+    });
 
     if (!existingInvoice) {
-      return NextResponse.json({ error: "Invoice not found" }, { status: 404 })
+      return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
     }
 
     // Check if externalId is already used by another invoice for the same customer
@@ -68,15 +72,15 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
           externalId,
           id: { not: invoiceId },
         },
-      })
+      });
 
       if (invoiceWithExternalId) {
-        return NextResponse.json({ error: "External ID is already in use for this customer" }, { status: 400 })
+        return NextResponse.json({ error: "External ID is already in use for this customer" }, { status: 400 });
       }
     }
 
     // Create audit logs for changed fields
-    const auditLogs = []
+    const auditLogs = [];
 
     if (amount !== undefined && amount !== existingInvoice.amount) {
       auditLogs.push({
@@ -84,7 +88,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
         fieldChanged: "amount",
         previousValue: existingInvoice.amount.toString(),
         newValue: amount.toString(),
-      })
+      });
     }
 
     if (status && status !== existingInvoice.status) {
@@ -93,7 +97,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
         fieldChanged: "status",
         previousValue: existingInvoice.status,
         newValue: status,
-      })
+      });
     }
 
     if (dueDate && new Date(dueDate).toISOString() !== existingInvoice.dueDate.toISOString()) {
@@ -102,7 +106,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
         fieldChanged: "dueDate",
         previousValue: existingInvoice.dueDate.toISOString(),
         newValue: new Date(dueDate).toISOString(),
-      })
+      });
     }
 
     if (description !== undefined && description !== existingInvoice.description) {
@@ -111,7 +115,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
         fieldChanged: "description",
         previousValue: existingInvoice.description || "",
         newValue: description || "",
-      })
+      });
     }
 
     if (externalId !== undefined && externalId !== existingInvoice.externalId) {
@@ -120,7 +124,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
         fieldChanged: "externalId",
         previousValue: existingInvoice.externalId || "",
         newValue: externalId || "",
-      })
+      });
     }
 
     // Update invoice
@@ -133,49 +137,51 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
         dueDate: dueDate ? new Date(dueDate) : undefined,
         description,
       },
-    })
+    });
 
     // Create audit logs
     if (auditLogs.length > 0) {
       await prisma.invoiceAuditLog.createMany({
         data: auditLogs,
-      })
+      });
     }
 
-    return NextResponse.json(updatedInvoice)
+    return NextResponse.json(updatedInvoice);
   } catch (error) {
-    console.error("Error updating invoice:", error)
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 })
+    console.error("Error updating invoice:", error);
+    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession(authOptions);
 
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const invoiceId = params.id
+    const { id } = await params;
+
+    const invoiceId = id;
 
     // Check if invoice exists
     const existingInvoice = await prisma.invoice.findUnique({
       where: { id: invoiceId },
-    })
+    });
 
     if (!existingInvoice) {
-      return NextResponse.json({ error: "Invoice not found" }, { status: 404 })
+      return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
     }
 
     // Delete invoice (this will cascade delete audit logs)
     await prisma.invoice.delete({
       where: { id: invoiceId },
-    })
+    });
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting invoice:", error)
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 })
+    console.error("Error deleting invoice:", error);
+    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
   }
 }

@@ -60,6 +60,13 @@ export async function GET() {
       ORDER BY month ASC
     `;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const safeMonthlyRevenue = (monthlyRevenue as any[]).map((row) => ({
+      ...row,
+      revenue: Number(row.revenue),
+      count: Number(row.count),
+    }));
+
     return NextResponse.json({
       totalCustomers,
       totalInvoices,
@@ -69,8 +76,8 @@ export async function GET() {
       invoicesByStatus: invoiceStats.reduce((acc: Record<string, number>, stat) => {
         acc[stat.status] = stat._count.id;
         return acc;
-      }, {} as Record<string, number>),
-      monthlyRevenue,
+      }, {}),
+      monthlyRevenue: safeMonthlyRevenue,
     });
   } catch (error) {
     console.error("Error fetching stats:", error);

@@ -4,10 +4,10 @@ import { InvoiceForm } from "@/components/invoice-form";
 import prisma from "@/lib/prisma";
 
 interface EditInvoicePageProps {
-  params: {
+  params: Promise<{
     id: string;
     invoiceId: string;
-  };
+  }>;
 }
 
 export const metadata: Metadata = {
@@ -16,15 +16,17 @@ export const metadata: Metadata = {
 };
 
 export default async function EditInvoicePage({ params }: EditInvoicePageProps) {
-  if (!params.id || !params.invoiceId) {
+  const { id, invoiceId } = await params;
+
+  if (!id || !invoiceId) {
     notFound();
   }
 
   // Verify invoice exists and belongs to the customer
   const invoice = await prisma.invoice.findFirst({
     where: {
-      id: params.invoiceId,
-      customerId: params.id,
+      id: invoiceId,
+      customerId: id,
     },
   });
 
@@ -39,7 +41,7 @@ export default async function EditInvoicePage({ params }: EditInvoicePageProps) 
         <p className="text-muted-foreground">Update invoice information</p>
       </div>
 
-      <InvoiceForm customerId={params.id} invoice={invoice} isEditing={true} />
+      <InvoiceForm customerId={id} invoice={invoice} isEditing={true} />
     </div>
   );
 }

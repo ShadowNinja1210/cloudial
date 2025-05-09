@@ -8,13 +8,19 @@ export const metadata: Metadata = {
   description: "Edit customer details",
 };
 
-export default async function EditCustomerPage({ params }: { params: { id: string } }) {
-  if (!params.id) {
+type EditCustomerPageProps = {
+  params: Promise<{ id: string }>;
+};
+
+export default async function EditCustomerPage(props: EditCustomerPageProps) {
+  const { id } = await props.params;
+
+  if (!id) {
     notFound();
   }
 
   const customer = await prisma.customer.findUnique({
-    where: { id: params.id },
+    where: { id },
   });
 
   if (!customer) {

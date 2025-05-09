@@ -4,10 +4,10 @@ import { InvoiceDetails } from "@/components/invoice-details";
 import prisma from "@/lib/prisma";
 
 interface InvoicePageProps {
-  params: {
+  params: Promise<{
     id: string;
     invoiceId: string;
-  };
+  }>;
 }
 
 export const metadata: Metadata = {
@@ -16,15 +16,17 @@ export const metadata: Metadata = {
 };
 
 export default async function InvoicePage({ params }: InvoicePageProps) {
-  if (!params.id || !params.invoiceId) {
+  const { id, invoiceId } = await params;
+
+  if (!id || !invoiceId) {
     notFound();
   }
 
   // Verify invoice exists and belongs to the customer
   const invoice = await prisma.invoice.findFirst({
     where: {
-      id: params.invoiceId,
-      customerId: params.id,
+      id: invoiceId,
+      customerId: id,
     },
   });
 
@@ -34,7 +36,7 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      <InvoiceDetails customerId={params.id} invoiceId={params.invoiceId} />
+      <InvoiceDetails customerId={id} invoiceId={invoiceId} />
     </div>
   );
 }
